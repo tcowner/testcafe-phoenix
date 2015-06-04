@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+
+
+</head>
+<body>
+<script type="text/javascript">
+    HammerheadClient.define('Settings', function (require, exports) {
+        exports.CROSS_DOMAIN_PROXY_PORT = 1335;
+    });
+
+    var UrlUtil = HammerheadClient.get('UrlUtil');
+
+    UrlUtil.OriginLocation.get = function () {
+        return 'http://origin_iframe_host';
+    };
+
+    var hammerhead = HammerheadClient.get('Hammerhead'),
+            PageProc = HammerheadClient.get('Shared.PageProc'),
+            MessageSandbox = HammerheadClient.get('DOMSandbox.Message');
+
+    hammerhead.init();
+
+    var serviceMsgHandler = function (evt) {
+        MessageSandbox.sendServiceMsg('', window.top);
+    };
+
+    MessageSandbox.on(MessageSandbox.SERVICE_MSG_RECEIVED, serviceMsgHandler);
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+</head>
+<body>
+<script type="text/javascript">
+    HammerheadClient.define('Settings', function (require, exports) {
+        exports.CROSS_DOMAIN_PROXY_PORT = 1335;
+    });
+
+    var UrlUtil = HammerheadClient.get('UrlUtil');
+
+    UrlUtil.OriginLocation.get = function () {
+        return 'https://example.com';
+    };
+
+    var hammerhead = HammerheadClient.get('Hammerhead');
+
+    hammerhead.init();
+    hammerhead.ShadowUI.getRoot();
+</script>
+<script>
+    eval(window[hammerhead.JSProcessor.PROCESS_SCRIPT_METH_NAME]([
+        'var childs = [\'hello\', \'testcafe\', \'!!!\'];',
+        'document.write(\'<div id="parent">\');',
+        'for (var i = 0; i < childs.length; i++) {',
+        '    document.write("<p>");',
+        '    document.write(childs[i]);',
+        '    document.write("</p>");',
+        '}',
+        'document.write("</div>");'
+    ].join('\n')));
+</script>
+</body>
+</html>

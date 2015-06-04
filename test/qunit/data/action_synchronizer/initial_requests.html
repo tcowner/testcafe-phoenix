@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+    <script type="text/javascript" src=/vendor/jquery-1.7.2.js></script>
+
+    <script>
+        TestCafeClient.define('Settings', {});
+
+        HammerheadClient.define('Settings', {});
+
+        var Hammerhead = HammerheadClient.get('Hammerhead');
+
+        Hammerhead.init();
+    </script>
+
+    <!-- Resource loading -->
+    <script src="/iframe-test/1000">
+    </script>
+
+    <!-- Initial requests -->
+    <script>
+        var $ = Hammerhead.$;
+
+        window.isReady = true;
+
+        var completeReqCount = 0,
+                reqCount = 2;
+
+        for (var i = 0; i < reqCount; i++) {
+            $.get('/xhr-test/500', function () {
+                completeReqCount++;
+            });
+        }
+
+        window.areIntialReqsCompleted = function () {
+            return completeReqCount === reqCount;
+        };
+    </script>
+
+</head>
+<body>
+
+</body>
+</html>

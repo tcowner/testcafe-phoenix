@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+</head>
+<body>
+<script type="text/javascript">
+    HammerheadClient.define('Settings', function (require, exports) {
+        exports.CROSS_DOMAIN_PROXY_PORT = 1335;
+        exports.JOB_UID                 = 'jobUid';
+        exports.JOB_OWNER_TOKEN         = 'ownerToken';
+    });
+
+    TestCafeClient.define('Settings', {});
+
+    var UrlUtil = HammerheadClient.get('UrlUtil');
+
+    UrlUtil.OriginLocation.get = function () {
+        return 'http://origin_iframe_host';
+    };
+
+    var hammerhead = HammerheadClient.get('Hammerhead'),
+            $ = hammerhead.$,
+            PageProc = HammerheadClient.get('Shared.PageProc'),
+            JSON = HammerheadClient.get('JSON');
+
+    hammerhead.init();
+
+    var IFrameDispatcher = TestCafeClient.get('Base.IFrameDispatcher'),
+            IFrameTestRunner = TestCafeClient.get('TestRunner.IFrameTestRunner');
+
+    var act = null,
+            ok = null,
+            notOk = null,
+            eq = null,
+            notEq = null,
+            runInContext = null;
+
+    function onTestRunnerInitialized (testRunner, callback) {
+        act   = testRunner.act;
+        ok    = testRunner.ok;
+        notOk = testRunner.notOk;
+        eq    = testRunner.eq;
+        notEq = testRunner.notEq;
+
+        try {
+            //!----------------------------------BEGIN HELPERS AND REQUIRES CODE----------------------------------
+            "<@ sharedJs @>";
+            //!------------------------------------END HELPERS AND REQUIRES CODE----------------------------------
+        } catch (err) {
+            act._onJSError(err);
+            return;
+        }
+
+        runInContext = function (stepName, step, stepNum, runner) {
+            runner([stepName], [function () {
+                eval('(' + step + ').call(this)');
+            }], stepNum, true);
+        };
+
+        callback(runInContext);
+    }
+
+    IFrameDispatcher.init(onTestRunnerInitialized);
+</script>
+
+
+</body>
+</html>

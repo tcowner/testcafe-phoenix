@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<div id="element" style="width: 30px; height: 30px; background-color:red"></div>
+<script>
+    window.handler = function (evt) {
+        var errorElement = null;
+        if (!evt){
+            errorElement = document.createElement('div');
+            errorElement.id = 'error';
+            errorElement.innerHTML = 'Empty window.event object!';
+            document.body.appendChild(errorElement);
+
+        }
+    };
+
+    document.getElementById('element').addEventListener('click', new Function('window.handler(event)'), true);
+</script>
+</body>
+</html>

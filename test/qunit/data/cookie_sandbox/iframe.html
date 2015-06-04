@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+    <script>
+        HammerheadClient.define('Settings', {});
+        HammerheadClient.get('Hammerhead').init();
+        HammerheadClient.get('Transport').queuedAsyncServiceMsg = function () {
+        };
+    </script>
+</head>
+<body></body>
+</html>

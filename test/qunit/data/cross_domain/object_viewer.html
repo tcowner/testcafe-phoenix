@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+</head>
+<body>
+<script type="text/javascript">
+    HammerheadClient.define('Settings', function (require, exports) {
+        exports.CROSS_DOMAIN_PROXY_PORT = 1335;
+    });
+
+    var UrlUtil = HammerheadClient.get('UrlUtil');
+
+    UrlUtil.OriginLocation.get = function () {
+        return 'http://origin_iframe_host';
+    };
+
+    var hammerhead = HammerheadClient.get('Hammerhead'),
+            MessageSandbox = HammerheadClient.get('DOMSandbox.Message'),
+            IFrameMessages = TestCafeClient.get('Base.CrossDomainMessages'),
+            ObjectViewer = TestCafeClient.get('UI.RecorderWidgets.ObjectViewer');
+
+    hammerhead.init();
+
+    MessageSandbox.on(MessageSandbox.SERVICE_MSG_RECEIVED, function (e) {
+        if (e.message.cmd === IFrameMessages.OBJECT_VIEWER_GET_OBJECT_VIEW_REQUEST_CMD) {
+            ObjectViewer.getObjectView(e.message.stringValue, null, function (objectView) {
+
+                delete objectView.parsedValue;
+
+                MessageSandbox.sendServiceMsg({
+                    cmd:         IFrameMessages.OBJECT_VIEWER_GET_OBJECT_VIEW_RESPONSE_CMD,
+                    objectView:  objectView,
+                    stringValue: e.message.stringValue
+                }, e.source);
+            });
+        }
+        else if (e.message.cmd === IFrameMessages.OBJECT_VIEWER_GET_OBJECT_PROPERTIES_ROWS_REQUEST_CMD) {
+            ObjectViewer.getObjectPropertiesRows(e.message.stringValue, e.message.getInheritedProperties, null, function (rows) {
+                MessageSandbox.sendServiceMsg({
+                    cmd:         IFrameMessages.OBJECT_VIEWER_GET_OBJECT_PROPERTIES_ROWS_RESPONSE_CMD,
+                    rows:        rows,
+                    stringValue: e.message.stringValue
+                }, e.source);
+            });
+        }
+    });
+</script>
+
+<div id="testDiv">div text</div>
+<div id="secondTestDiv" style="margin-top: 300px">This is a div element with id "secondTestDiv" in cross-domain iFrame
+</div>
+</body>
+</html>

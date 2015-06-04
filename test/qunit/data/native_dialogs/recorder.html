@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+
+    <script>
+        Object.defineProperty(window, 'self', {
+            get: function () {
+                return window.top;
+            }
+        });
+
+        TestCafeClient.define('Settings', function (require, exports) {
+            exports.SERVICE_MSG_URL = '/service-msg/0';
+            exports.RECORDING       = true;
+        });
+
+
+        HammerheadClient.define('Settings', function (require, exports) {
+            exports.WORKER_IDLE_URL = './empty.html';
+            exports.RECORDING       = true;
+        });
+
+        var UrlUtil = HammerheadClient.get('UrlUtil');
+
+        UrlUtil.OriginLocation.get = function () {
+            return 'http://origin_iframe_host';
+        };
+
+        var $ = HammerheadClient.get('jQuery'),
+                Hammerhead = HammerheadClient.get('Hammerhead'),
+                JSProcessor = Hammerhead.JSProcessor,
+                Util = Hammerhead.Util,
+                Recorder = TestCafeClient.get('Recorder.Recorder'),
+                RecorderUI = TestCafeClient.get('UI.Recorder'),
+                EventListener = TestCafeClient.get('Recorder.EventListener'),
+                ModalBackground = TestCafeClient.get('UI.ModalBackground'),
+                JavascriptExecutor = TestCafeClient.get('Base.JavascriptExecutor');
+
+        JavascriptExecutor.init = function () {
+        };
+
+        Hammerhead.init();
+
+        RecorderUI.confirmAction = function (stepNum, stepInfo, callback) {
+            window.setTimeout(function () {
+                callback(true, stepInfo);
+            }, 500);
+        };
+
+        var recorder = new Recorder();
+
+        $(document).ready(function () {
+            ModalBackground.initAndShowLoadingText();
+            ModalBackground.hide();
+
+            recorder.start();
+        });
+
+        window.Transport = TestCafeClient.get('Base.Transport');
+
+        var savedStartEventListener = EventListener.start,
+                eventParsedCallback = null;
+
+        EventListener.start = function (callback, options) {
+            eventParsedCallback = callback;
+            savedStartEventListener(callback, options);
+        };
+
+        window.recorder = recorder;
+        window.eventParsedCallback = eventParsedCallback;
+
+        window.setBeforeUnloadProperty = function (value) {
+            window[JSProcessor.SET_PROPERTY_METH_NAME](window, 'onbeforeunload', value);
+        };
+
+    </script>
+</head>
+<body>
+<!-- Setup page -->
+<input type="text" value="text" id="textInput"/>
+
+<form>
+    <a id="link" href="./empty.html">Link</a>
+</form>
+
+</body>
+</html>

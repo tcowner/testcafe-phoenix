@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+    <style>
+        html,
+        body {
+            height: 1500px;
+            width: 100%;
+        }
+
+        input,
+        button,
+        textarea,
+        #contentedit {
+            position: absolute;
+            padding: 0;
+            margin: 0;
+            border: 0;
+        }
+
+        .draggable {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            background-color: grey;
+            z-index: 5;
+        }
+
+        .target {
+            width: 120px;
+            height: 120px;
+            position: absolute;
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+    HammerheadClient.define('Settings', function (require, exports) {
+        exports.CROSS_DOMAIN_PROXY_PORT = 1335;
+        exports.JOB_UID                 = 'jobUid';
+        exports.JOB_OWNER_TOKEN         = 'ownerToken';
+    });
+
+    TestCafeClient.define('Settings', {});
+
+    var UrlUtil = HammerheadClient.get('UrlUtil');
+
+    UrlUtil.OriginLocation.get = function () {
+        return 'http://origin_iframe_host';
+    };
+
+    var hammerhead = HammerheadClient.get('Hammerhead'),
+            $ = hammerhead.$,
+            Util = hammerhead.Util,
+            PageProc = HammerheadClient.get('Shared.PageProc'),
+            JSON = HammerheadClient.get('JSON'),
+            TextSelection = hammerhead.TextSelection;
+
+    hammerhead.init();
+
+    var IFrameDispatcher = TestCafeClient.get('Base.IFrameDispatcher'),
+            IFrameTestRunner = TestCafeClient.get('TestRunner.IFrameTestRunner');
+
+    var act = null,
+            ok = null,
+            notOk = null,
+            eq = null,
+            notEq = null,
+            runInContext = null;
+
+    function onTestRunnerInitialized (testRunner, callback) {
+        act   = testRunner.act;
+        ok    = testRunner.ok;
+        notOk = testRunner.notOk;
+        eq    = testRunner.eq;
+        notEq = testRunner.notEq;
+
+        try {
+            //!----------------------------------BEGIN HELPERS AND REQUIRES CODE----------------------------------
+            "<@ sharedJs @>";
+            //!------------------------------------END HELPERS AND REQUIRES CODE----------------------------------
+        } catch (err) {
+            act._onJSError(err);
+            return;
+        }
+
+        runInContext = function (stepName, step, stepNum, runner) {
+            runner([stepName], [function () {
+                eval('(' + step + ').call(this)');
+            }], stepNum, true);
+        };
+
+        callback(runInContext);
+    }
+
+    IFrameDispatcher.init(onTestRunnerInitialized);
+
+    IFrameTestRunner.prototype._onAssertionFailed = function () {
+        eval(PageProc.processScript("window.top.postMessage('assertionFailed');"));
+    };
+
+    IFrameTestRunner.prototype._onPossibleFailCauseFound = function () {
+        eval(PageProc.processScript("window.top.postMessage('possibleFailCauseFound');"));
+    };
+
+    IFrameTestRunner.prototype._onError = function () {
+        eval(PageProc.processScript("window.top.postMessage('onError');"));
+    };
+</script>
+<div id="drag" class="draggable" style="left: 50px; top: 50px;"></div>
+
+<button id="forRClick" style="left: 250px; top: 50px; width: 20px; height: 20px;">button 1</button>
+
+<input id="input" type="text" value="test" style="left: 50px; top: 200px; width: 80px; height: 30px;"/>
+
+<div id="target" class="target" style="left: 200px; top: 200px;"></div>
+
+<textarea id="textarea" style="left: 50px; top: 250px; width: 100px; height: 50px;">123456789</textarea>
+
+<div id="dragWithScroll" class="draggable" style="left: 300px; top: 400px;"></div>
+
+<input id="forClick" type="button" value="button 2" style="left: 100px; top: 500px; width: 100px; height: 40px;"/>
+<input id="forDblClick" type="button" value="button 3" style="left: 500px; top: 600px; width: 100px; height: 40px;"/>
+
+<input id="inputWithScroll" type="text" value="test me all test me all"
+       style="left: 50px; top: 650px; width: 40px; height: 20px;"/>
+<textarea id="textareaWithScroll" style="left: 50px; top: 700px; width: 150px; height: 50px; line-height: 30px">
+    123456789
+    qwerty 123
+    test text
+</textarea>
+
+<div id="contentedit" contenteditable="true" style="left: 50px; top: 800px; width: 150px; height: 100px; ">
+    123456789
+    <p>qwerty test qunit</p>
+    987654321
+</div>
+<script>
+    //Globals
+    var oldIFrameScroll = 0,
+
+//event flags
+            bodyMouseOver = false,
+            bodyMouseOut = false,
+            divMouseOver = false,
+            divMouseOut = false,
+
+            offsetX = null,
+            offsetY = null,
+            eventCoordWrong = false;
+
+    //Util
+    function checkIFrameScroll (left, top, checkOldValue) {
+        var documentScroll = Util.getElementScroll($(document));
+        return documentScroll.left === left && documentScroll.top === top &&
+               (checkOldValue ? (documentScroll.left === oldIFrameScroll.left &&
+               documentScroll.top === oldIFrameScroll.top) : true);
+    }
+
+    function getCenter (element) {
+        return {
+            x: Math.floor(element.offsetLeft + element.offsetWidth / 2),
+            y: Math.floor(element.offsetTop + element.offsetHeight / 2)
+        }
+    }
+
+    function isInTarget (element, target) {
+        var elementCenter = getCenter(element),
+            targetCenter  = getCenter(target);
+        return (elementCenter.x === targetCenter.x) && (elementCenter.y === targetCenter.y);
+    }
+
+    function checkSelection (el, startNode, startOffset, endNode, endOffset) {
+        var curDocument = Util.findDocument(el),
+            selection   = curDocument.getSelection();
+
+        return Util.getActiveElement() === el && Util.isTheSameNode(startNode, selection.anchorNode) &&
+               selection.anchorOffset === startOffset &&
+               Util.isTheSameNode(endNode, selection.focusNode) && selection.focusOffset === endOffset;
+    }
+
+    var elementOffset = null,
+            inputRight = null,
+            inputBottom = null,
+
+            selectionStarted = false,
+            oldDocumentScroll = null,
+            startPos = null,
+            checkOldValue = false;
+
+    var startDragHandler = function (e) {
+        oldDocumentScroll = Util.getElementScroll($(document));
+
+        startPos = {
+            x: e.pageX,
+            y: e.pageY
+        };
+
+        selectionStarted = true;
+    };
+
+    var dragHandler = function (e) {
+        if (selectionStarted) {
+            if (e.pageX < startPos.x || e.pageX > inputRight || e.pageY < startPos.y || e.pageY > inputBottom) {
+                eval(PageProc.processScript("window.top.postMessage('selectionFailed');"));
+            }
+
+            if (checkOldValue) {
+                var currentDocumentScroll = Util.getElementScroll($(document));
+                if (currentDocumentScroll.left !== oldDocumentScroll.left ||
+                    currentDocumentScroll.top !== oldDocumentScroll.top) {
+                    eval(PageProc.processScript("window.top.postMessage('selectionFailed');"));
+                }
+            }
+        }
+    };
+
+    function bindHandlerForSelectionCheck ($el, check) {
+        elementOffset = Util.getOffsetPosition($el[0]);
+        inputRight    = elementOffset.left + $el.width();
+        inputBottom   = elementOffset.top + $el.height();
+        checkOldValue = check;
+
+        $el.bind(Util.hasTouchEvents ? 'touchstart' : 'mousedown', startDragHandler);
+        $el.bind(Util.hasTouchEvents ? 'touchmove' : 'mousemove', dragHandler);
+        $el.bind(Util.hasTouchEvents ? 'touchend' : 'mouseup', dragHandler);
+    }
+
+    function unbindHandlerForSelectionCheck ($el) {
+        elementOffset     = null;
+        inputRight        = null;
+        inputBottom       = null;
+        selectionStarted  = false;
+        oldDocumentScroll = null;
+        startPos          = null;
+        checkOldValue     = false;
+
+        $el.unbind(Util.hasTouchEvents ? 'touchstart' : 'mousedown', startDragHandler);
+        $el.unbind(Util.hasTouchEvents ? 'touchmove' : 'mousemove', dragHandler);
+        $el.unbind(Util.hasTouchEvents ? 'touchend' : 'mouseup', dragHandler);
+    }
+
+    function getCurrentPoint (e) {
+        if (Util.hasTouchEvents) {
+            var documentScroll = Util.getElementScroll($(document));
+            return {
+                x: (e.originalEvent.targetTouches[0].pageX || e.originalEvent.touches[0].pageX) + documentScroll.left,
+                y: (e.originalEvent.targetTouches[0].pageY || e.originalEvent.touches[0].pageY) + documentScroll.top
+            };
+        }
+        return {
+            x: e.pageX,
+            y: e.pageY
+        };
+    }
+
+    function mouseOverHandler () {
+        divMouseOver = true;
+    }
+
+    function mouseOutHandler () {
+        divMouseOut = true;
+    }
+
+    function bindEventHandlers ($el) {
+        var $body = $('body');
+
+        $el.bind('mouseover', mouseOverHandler);
+        $el.bind('mouseout', mouseOutHandler);
+
+        $body.bind('mouseover', function () {
+            bodyMouseOver = true;
+        });
+        $body.bind('mouseout', function () {
+            bodyMouseOut = true;
+        });
+    }
+
+    function unbindEventHandlers ($el) {
+        $el.unbind('mouseover', mouseOverHandler);
+        $el.unbind('mouseout', mouseOutHandler);
+    }
+
+    function checkCenterHandler (e) {
+        var point  = getCurrentPoint(e),
+            center = Util.findCenter(e.target);
+
+        if (e.type === 'mousedown') {
+            eventCoordWrong = ((point.x !== (offsetX !== null ? e.target.offsetLeft + offsetX : center.x)) ||
+                               (point.y !== (offsetY !== null ? e.target.offsetTop + offsetY : center.y)));
+        }
+        else if (e.type === 'mouseup') {
+            eventCoordWrong = point.x !== center.x || point.y !== center.y;
+        }
+    }
+
+    function bindCheckCenterHandlers ($el) {
+        $el.bind(Util.hasTouchEvents ? 'touchstart' : 'mousedown', checkCenterHandler);
+        $el.bind(Util.hasTouchEvents ? 'touchend' : 'mouseup', checkCenterHandler);
+    }
+
+    function unbindCheckCenterHandlers ($el) {
+        offsetX = null;
+        offsetY = null;
+        $el.unbind(Util.hasTouchEvents ? 'touchstart' : 'mousedown', checkCenterHandler);
+        $el.unbind(Util.hasTouchEvents ? 'touchend' : 'mouseup', checkCenterHandler);
+    }
+
+    function clearEventFlags () {
+        bodyMouseOver = false;
+        bodyMouseOut  = false;
+        divMouseOver  = false;
+        divMouseOut   = false;
+    }
+
+    function checkIFrameEventFlags (divOver, divOut, bodyOver, skipDivOut) {
+        //NOTE: in dragging 'mouseout' event can be raised for div
+        var result = divOver === divMouseOver && (divOut === divMouseOut || skipDivOut) && bodyOver === bodyMouseOver;
+
+        clearEventFlags();
+
+        return result;
+    }
+
+    $(document).ready(function () {
+        $('#forRClick').bind('contextmenu', function () {
+            eval(PageProc.processScript("window.top.postMessage('rclickRaised');"));
+        });
+
+        $('#forClick').bind('click', function () {
+            eval(PageProc.processScript("window.top.postMessage('clickRaised');"));
+        });
+
+        $('#forDblClick').bind('dblclick', function () {
+            eval(PageProc.processScript("window.top.postMessage('dblclickRaised');"));
+        });
+
+        var checkElementsSelected = function () {
+            if (this.tagName.toLowerCase() === 'input' && this.type !== 'text') {
+                return;
+            }
+
+            if (this.selectionStart !== this.selectionEnd) {
+                eval(PageProc.processScript("window.top.postMessage('selectRaised');"));
+            }
+        };
+        $('input').bind(Util.hasTouchEvents ? 'touchend' : 'mouseup', checkElementsSelected);
+
+        $('textarea').bind(Util.hasTouchEvents ? 'touchend' : 'mouseup', checkElementsSelected);
+
+        $('#contentedit').bind(Util.hasTouchEvents ? 'touchend' : 'mouseup', function () {
+            if (TextSelection.getSelectionStart(this) !== TextSelection.getSelectionEnd(this)) {
+                eval(PageProc.processScript("window.top.postMessage('selectRaised');"));
+            }
+        });
+
+        //draggable
+        var $draggable     = $('.draggable'),
+            hasTouchEvents = Util.hasTouchEvents,
+            getValueFromPx = function (px) {
+                return parseInt(px.replace('px', ''));
+            },
+
+            startPos,
+            startMousePos;
+
+        $.each($draggable, function (index, item) {
+            var $item = $(item);
+
+            $item.bind(hasTouchEvents ? 'touchstart' : 'mousedown', function (e) {
+                startPos      = {
+                    x: getValueFromPx($item.css('left')),
+                    y: getValueFromPx($item.css('top'))
+                };
+                startMousePos = hasTouchEvents ? {
+                    x: e.originalEvent.targetTouches[0].pageX || e.originalEvent.touches[0].pageX,
+                    y: e.originalEvent.targetTouches[0].pageY || e.originalEvent.touches[0].pageY
+                } : {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+                $(this).data('dragStarted', true);
+
+                oldIFrameScroll = Util.getElementScroll($(document));
+                eval(PageProc.processScript("window.top.postMessage('dragStart');"));
+            });
+
+            $item.bind(hasTouchEvents ? 'touchend' : 'mouseup', function (e) {
+                $(this).data('dragStarted', false);
+            });
+        });
+
+        $(document).bind(hasTouchEvents ? 'touchmove' : 'mousemove', function (e) {
+            var curMousePos = hasTouchEvents ? {
+                x: e.originalEvent.targetTouches[0].pageX || e.originalEvent.touches[0].pageX,
+                y: e.originalEvent.targetTouches[0].pageY || e.originalEvent.touches[0].pageY
+            } : {
+                x: e.clientX,
+                y: e.clientY
+            };
+
+            $.each($draggable, function () {
+                if ($(this).data('dragStarted')) {
+                    $(this).css({
+                        left: curMousePos.x - 50 + $(window).scrollLeft() + 'px',
+                        top:  curMousePos.y - 50 + $(window).scrollTop() + 'px'
+                    });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

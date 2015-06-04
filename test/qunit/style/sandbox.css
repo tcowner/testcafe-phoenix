@@ -1,0 +1,88 @@
+#root-TC2b9a6d .settings-panel {
+    position: fixed;
+    float: right;
+    width: 500px;
+    top: 0px;
+    background-color: rgba(200, 200, 200, 0.2);
+    z-index: 2147483647;
+    padding: 10px
+}
+
+#root-TC2b9a6d .settings-panel .title {
+    font-size: 18px;
+    color: black;
+    text-align: center;
+    text-decoration: underline;
+    padding-bottom: 10px;
+}
+
+#root-TC2b9a6d .settings-panel .block {
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+#root-TC2b9a6d .settings-panel .block .title {
+    font-size: 14px;
+    color: black;
+    text-align: left;
+    text-decoration: underline;
+    padding-bottom: 5px;
+}
+
+#root-TC2b9a6d .settings-panel button.button,
+#root-TC2b9a6d .settings-panel label.label,
+#root-TC2b9a6d .settings-panel input.input,
+#root-TC2b9a6d .settings-panel input.input:hover {
+    margin-bottom: 5px;
+    color: black !important;
+    background: inherit !important;
+}
+
+#root-TC2b9a6d .settings-panel button.button {
+    height: 15px;
+    padding: 5px 10px;
+    margin-top: 5px;
+    cursor: pointer;
+    display: block;
+}
+
+#root-TC2b9a6d .settings-panel select.select {
+    cursor: pointer;
+}
+
+#root-TC2b9a6d .settings-panel label.label {
+    border: none;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#root-TC2b9a6d .settings-panel .input-area {
+    display: block;
+}
+
+#root-TC2b9a6d .settings-panel button.button,
+#root-TC2b9a6d .settings-panel input.input,
+#root-TC2b9a6d .settings-panel input.input:hover {
+    border: inherit !important;
+}
+
+#root-TC2b9a6d .settings-panel input.input,
+#root-TC2b9a6d .settings-panel input.input:hover {
+    background-color: white !important;
+}
+
+#root-TC2b9a6d.root-TC2b9a6d .settings-panel .log {
+    width: 100%;
+    height: 200px;
+    background-color: white;
+    overflow-y: scroll;
+}
+
+#root-TC2b9a6d.root-TC2b9a6d .settings-panel .log div {
+    font-family: "Courier New";
+}
+
+#root-TC2b9a6d.root-TC2b9a6d .settings-panel input.checkbox {
+    cursor: pointer;
+}

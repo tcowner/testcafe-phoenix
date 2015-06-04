@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+
+    <script>
+        Object.defineProperty(window, 'self', {
+            get: function () {
+                return window.top;
+            }
+        });
+
+        TestCafeClient.define('Settings', function (require, exports) {
+            exports.SERVICE_MSG_URL = '/service-msg/0';
+            exports.WORKER_IDLE_URL = './empty.html';
+            exports.RECORDING = true;
+        });
+
+        HammerheadClient.define('Settings', function (require, exports) {
+            exports.SERVICE_MSG_URL = '/service-msg/0';
+            exports.WORKER_IDLE_URL = './empty.html';
+            exports.RECORDING = true;
+        });
+
+        var $ = HammerheadClient.get('jQuery'),
+                Hammerhead = HammerheadClient.get('Hammerhead'),
+                Util = Hammerhead.Util,
+                Recorder = TestCafeClient.get('Recorder.Recorder'),
+                ActionManager = TestCafeClient.get('Recorder.ActionManager'),
+                ModalBackground = TestCafeClient.get('UI.ModalBackground');
+
+        Hammerhead.init();
+
+        window.ActionManagerEventEmitter = new Util.EventEmitter();
+        window.ActionManager = ActionManager;
+        window.EventSandbox = Hammerhead.EventSandbox;
+
+        ActionManager.events = {
+            on: function (ev, listener) {
+                window.ActionManagerEventEmitter.on(ev, listener);
+            }
+        };
+
+        $(document).ready(function () {
+            ModalBackground.initAndShowLoadingText();
+            ModalBackground.hide();
+
+            window.recorder = new Recorder();
+            window.recorder.start();
+        });
+
+    </script>
+</head>
+<body>
+<form>
+    <a id="link" href="./empty.html">Link</a>
+    <input type="text" value="text" id="textInput"/>
+</form>
+
+</body>
+</html>

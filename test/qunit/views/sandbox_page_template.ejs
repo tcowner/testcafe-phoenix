@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link type="text/css" rel=stylesheet href="/testcafe_client/styles.css" class="ui-stylesheet-TC2b9a6d">
+    <link type="text/css" rel=stylesheet href=/style/sandbox.css class="ui-stylesheet-TC2b9a6d">
+
+    <script type="text/javascript" src=/vendor/jquery-1.7.2.js class="script-TC2b9a6d"></script>
+    <script type="text/javascript" src=/vendor/qunit.js class="script-TC2b9a6d"></script>
+
+    <script>
+        (function () {
+            <%- testPageSetup %>
+        })();
+    </script>
+
+    <script src="/hammerhead_client/hammerhead.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_recorder.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_core.js" class="script-TC2b9a6d"></script>
+    <script src="/testcafe_client/testcafe_ui_recorder.js" class="script-TC2b9a6d"></script>
+
+
+    <script type="text/javascript">
+        (function () {
+            <%- customTestPageSetup %>
+        })();
+    </script>
+</head>
+<body>
+    <%- testMarkup %>
+
+    <script type="text/javascript">
+        (function () {
+            <%- testFixture %>
+        })();
+    </script>
+</body>
+</html>
