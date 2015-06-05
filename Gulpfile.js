@@ -1,6 +1,7 @@
-var gulp            = require('gulp'),
-    concat          = require('gulp-concat'),
-    del             = require('del');
+var gulp    = require('gulp'),
+    concat  = require('gulp-concat'),
+    del     = require('del'),
+    Promise = require('promise');
 
 var sourcemaps = require('gulp-sourcemaps');
 var babel      = require('gulp-babel');
@@ -119,11 +120,101 @@ var HangPromise = makePromise(function () {
         return HangPromise;
     });
 
-    gulp.task('Farm-Hammerhead-QUnit', ['Hammerhead-Build'], function () {
-        gulp.watch('hammerhead/client/**', ['Hammerhead-Build']);
+    (function SAUCE_LABS_QUNIT_TESTING () {
+        var SauceTunnel = require('sauce-tunnel');
+        var QUnitRunner = require('./test/qunit/sauce-labs-qunit-runner');
+        var gulpConnect = require('gulp-connect');
 
-        require('./test/qunit/server.js').start();
+        var SAUCE_LABS_USERNAME = 'alexandermos';
+        var SAUCE_LABS_PASSWORD = '3715e8f7-35de-431d-9c0e-6730b54f330f';
+        var BROWSERS            = [
+            {
+                browserName: "chrome",
+                platform:    "Windows 7"
+            }/*,
+             {
+             browserName: "firefox",
+             platform:    "Windows 8"
+             }*/];
 
-        return HangPromise;
-    });
+        var tunnelIdentifier  = Math.floor((new Date()).getTime() / 1000 - 1230768000).toString();
+        var sauceTunnel       = null;
+        var sauceTunnelOpened = false;
+        var taskSucceed       = true;
+        var qUnitServerUrl    = null;
+
+        gulp.task('open-connect', function () {
+            gulpConnect.server({
+                root: '',
+                port: 1335
+            });
+        });
+
+        gulp.task('sauce-start', function () {
+            return new Promise(function (resolve, reject) {
+                sauceTunnel = new SauceTunnel(SAUCE_LABS_USERNAME, SAUCE_LABS_PASSWORD, tunnelIdentifier, true);
+
+                sauceTunnel.start(function (isCreated) {
+                    if (!isCreated)
+                        reject('Failed to create Sauce tunnel');
+                    else {
+                        sauceTunnelOpened = true;
+                        resolve('Connected to Sauce Labs');
+                    }
+                });
+            });
+        });
+
+        gulp.task('run-tests', ['Hammerhead-Build', 'run-qunit-server', 'sauce-start'], function (callback) {
+            var runner = new QUnitRunner({
+                username:         SAUCE_LABS_USERNAME,
+                key:              SAUCE_LABS_PASSWORD,
+                browsers:         BROWSERS,
+                tunnelIdentifier: tunnelIdentifier,
+                urls:             [qUnitServerUrl + '/run-dir?dir=fixtures/hammerhead_client']
+            });
+
+            runner.runTests(function (results) {
+                var failedCount = false;
+
+                console.log(JSON.stringify(results, null, 4));
+
+                results.forEach(function (resultsByUrl) {
+                    resultsByUrl.forEach(function (platformResults) {
+                        if (platformResults.result.failed)
+                            failedCount += platformResults.result.failed;
+                    });
+                });
+
+                taskSucceed = !failedCount;
+
+                if (!taskSucceed)
+                    console.log(failedCount, 'test(s) are failed');
+                callback();
+            });
+        });
+
+        gulp.task('sauce-end', ['run-tests'], function (callback) {
+            sauceTunnelOpened = false;
+            sauceTunnel.stop(callback);
+        });
+
+        gulp.task('close-connect', ['run-tests'], function () {
+            gulpConnect.serverClose();
+        });
+
+        gulp.task('run-qunit-server', function () {
+            qUnitServerUrl = require('./test/qunit/server.js').start(true);
+        });
+
+        gulp.task('Sauce-labs-Hammerhead-QUnit', ['Hammerhead-Build', 'run-tests', 'sauce-end'], function () {
+            if (!taskSucceed)
+                process.exit(1);
+        });
+
+        gulp.on('err', function () {
+            if (sauceTunnelOpened)
+                sauceTunnel.stop(new Function());
+        });
+    })();
 })();

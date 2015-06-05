@@ -32,5 +32,30 @@
 
     <h2><a href="/run-dir?dir=<%= encodeURIComponent(path) %>">Restart</a></h2>
 
+    <script>
+        var res = {
+            passed: <%- success %>,
+            failed: <%- total %> - <%- success %>,
+            total: <%- total %>,
+            duration: 777,
+            errors: []
+        };
+
+        <% for(var i = 0; i < failed.length; i++) { %>
+            var failedTest = {
+                testPath: '<%- failed[i].testPath %>',
+                testName: '<%- failed[i].testName %>',
+                customMessage: '<%- failed[i].customMessage %>'
+            };
+            <% if(failed[i].diff) { %>
+                failedTest.expected = '<%- failed[i].diff.expected %>';
+                failedTest.actual = '<%- failed[i].diff.actual %>';
+            <% } %>
+            res.errors.push(failedTest);
+        <% } %>
+
+        window.global_test_results = res;
+    </script>
+
 </body>
 </html>

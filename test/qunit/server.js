@@ -293,7 +293,7 @@ function urlRewriteProxyRequest (req, res, next) {
     next();
 }
 
-var start = function () {
+var start = function (silent) {
     runCrossDomainServer();
 
     var app        = Express(),
@@ -327,7 +327,7 @@ var start = function () {
         }, delay);
     });
 
-    app.get('/xhr-large-response',function(req, res){
+    app.get('/xhr-large-response', function (req, res) {
         var data = new Array(1000);
         res.send(data);
     });
@@ -432,9 +432,10 @@ var start = function () {
 
     appServer.listen(PORT);
     console.log('Server listens on port ' + PORT);
-    Process.exec('start http://localhost:' + PORT);
+    if (!silent)
+        Process.exec('start http://localhost:' + PORT);
 
-    return appServer;
+    return 'http://localhost:' + PORT;
 };
 
 function runCrossDomainServer () {
