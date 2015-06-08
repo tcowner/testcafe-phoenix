@@ -25,7 +25,7 @@ exports['pageProc.processPage'] = {
             return src;
         });
 
-        t.ok(testUtils.compareCode($.html(), src));
+        t.ok(!testUtils.compareCode($.html(), src));
         t.done();
     },
 
