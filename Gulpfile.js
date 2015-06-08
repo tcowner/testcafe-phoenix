@@ -110,6 +110,12 @@ var HangPromise = makePromise(function () {
 //============================================================================================================
 
 (function TESTING () {
+    var nodeunit = function () {
+        var a = require('gulp-nodeunit');
+
+        return a();
+    };
+
     //Public tasks
     //---------------------------------------------------------------------------
     gulp.task('Hammerhead-QUnit', ['Hammerhead-Build'], function () {
@@ -207,7 +213,7 @@ var HangPromise = makePromise(function () {
             qUnitServerUrl = require('./test/qunit/server.js').start(true);
         });
 
-        gulp.task('Sauce-labs-Hammerhead-QUnit', ['Hammerhead-Build', 'run-tests', 'sauce-end'], function () {
+        gulp.task('Qunit-Farm', ['Hammerhead-Build', 'run-tests', 'sauce-end'], function () {
             if (!taskSucceed)
                 process.exit(1);
         });
@@ -216,5 +222,15 @@ var HangPromise = makePromise(function () {
             if (sauceTunnelOpened)
                 sauceTunnel.stop(new Function());
         });
+
+
     })();
+
+    gulp.task('Nodeunit', ['Hammerhead-Build'], function () {
+        return gulp
+            .src('test/nodeunit/**/*_test.js')
+            .pipe(nodeunit());
+    });
+
+    gulp.task('Farm-Tests', process.env.TEST_TYPE ? [process.env.TEST_TYPE] : []);
 })();
