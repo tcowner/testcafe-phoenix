@@ -13,6 +13,7 @@ var QUnitTestRunner = module.exports = function (options) {
     this.options = {
         username:         options.username || '',
         key:              options.key || '',
+        build:            options.build || Date.now(),
         browsers:         browsers,
         testName:         options.testName || 'QUnit tests',
         tags:             options.tags || ['master'],
@@ -81,7 +82,7 @@ QUnitTestRunner.prototype._startTask = function (browsers, url) {
             platforms:           browsers,
             url:                 url,
             framework:           'qunit',
-            build:               Date.now(),
+            build:               this.options.build,
             tags:                this.options.tags,
             name:                this.options.testName,
             'tunnel-identifier': this.options.tunnelIdentifier
