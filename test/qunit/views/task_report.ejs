@@ -33,15 +33,19 @@
     <h2><a href="/run-dir?dir=<%= encodeURIComponent(path) %>">Restart</a></h2>
 
     <script>
+        var passedCount = <%- success %>,
+            totalCount = <%- total %>,
+            failedCount = totalCount - passedCount;
+
         var res = {
-            passed: <%- success %>,
-            failed: <%- total %> - <%- success %>,
-            total: <%- total %>,
-            duration: 777,
-            errors: []
+            passed: passedCount,
+            failed: failedCount,
+            total: totalCount,
+            runtime: 777/*,
+            errors: []*/
         };
 
-        <% for(var i = 0; i < failed.length; i++) { %>
+        /*<% for(var i = 0; i < failed.length; i++) { %>
             var failedTest = {
                 testPath: '<%- failed[i].testPath %>',
                 testName: '<%- failed[i].testName %>',
@@ -52,8 +56,26 @@
                 failedTest.actual = '<%- failed[i].diff.actual %>';
             <% } %>
             res.errors.push(failedTest);
-        <% } %>
+        <% } %>*/
 
+        var counter = 0;
+        function generateRes(success) {
+            return {
+                name: 'Test ' + counter,
+                result: success,
+                message: 'Message ' + counter++,
+                duration: 100
+            }
+        }
+
+        res.tests = [];
+
+        for(i = 0; i < passedCount; i++)
+            res.tests.push(generateRes(true));
+
+        for(i = 0; i < failedCount; i++)
+            res.tests.push(generateRes(false));
+        debugger;
         window.global_test_results = res;
     </script>
 

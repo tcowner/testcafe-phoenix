@@ -175,7 +175,7 @@ var HangPromise = makePromise(function () {
             var runner = new QUnitRunner({
                 username:         SAUCE_LABS_USERNAME,
                 key:              SAUCE_LABS_PASSWORD,
-                build:            process.env.TRAVIS_COMMIT || '',
+                build:            process.env.TRAVIS_JOB_ID || '',
                 browsers:         BROWSERS,
                 tunnelIdentifier: tunnelIdentifier,
                 urls:             [qUnitServerUrl + '/run-dir?dir=fixtures/hammerhead_client']
