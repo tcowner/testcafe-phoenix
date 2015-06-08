@@ -82,6 +82,8 @@ QUnitTestRunner.prototype._startTask = function (browsers, url) {
             platforms:           browsers,
             url:                 url,
             framework:           'qunit',
+            passed:              true,
+            public:              'public',
             build:               this.options.build,
             tags:                this.options.tags,
             name:                this.options.testName,
