@@ -9,3 +9,9 @@ matrix:
       env: TEST_TYPE="Nodeunit"
     - node_js: "0.10"
       env: TEST_TYPE="Qunit-Farm"
+
+  before_script:
+    - ./travis.sh before
+
+  after_success:
+    - ./travis.sh branch
