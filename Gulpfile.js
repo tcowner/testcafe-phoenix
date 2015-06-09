@@ -181,7 +181,8 @@ var HangPromise = makePromise(function () {
                 build:            process.env.TRAVIS_JOB_ID || '',
                 browsers:         BROWSERS,
                 tunnelIdentifier: tunnelIdentifier,
-                urls:             [qUnitServerUrl + '/run-dir?dir=fixtures/hammerhead_client']
+                urls:             [qUnitServerUrl + '/run-dir?dir=fixtures/hammerhead_client'],
+                tags:             [process.evn.TRAVIS_BRANCH || 'master']
             });
 
             runner.runTests(function (results) {
@@ -218,6 +219,7 @@ var HangPromise = makePromise(function () {
         });
 
         gulp.task('Qunit-Farm', ['Hammerhead-Build', 'run-tests', 'sauce-end'], function () {
+            console.log('Qunit-Farm variables:', SAUCE_LABS_USERNAME, SAUCE_LABS_PASSWORD, process.evn.TRAVIS_BRANCH);
             if (!taskSucceed)
                 process.exit(1);
         });
