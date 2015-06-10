@@ -1,5 +1,4 @@
 repo="https://${GH_TOKEN}@github.com/$TRAVIS_REPO_SLUG.git"
-echo $repo
 
 # If this is not a pull request, we dont want to continue
 if [ "$TRAVIS_PULL_REQUEST" == "false" ] ; then
@@ -7,18 +6,13 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ] ; then
   exit 0
 fi
 
-echo "fetch"
 git fetch
-echo "branch"
 git branch --all
 
 # This part of the script is run before installing deps or tests
 if [ "$1" = "before" ] ; then
-	echo "checkout"
 	git checkout -b incoming-pr-$TRAVIS_BUILD_ID
-	echo "push"
-	git push $repo incoming-pr-$TRAVIS_BUILD_ID -q 2> /dev/null
-	echo "checkout"
+	git push $repo incoming-pr-$TRAVIS_BUILD_ID
 	git checkout master
     exit 0
 fi

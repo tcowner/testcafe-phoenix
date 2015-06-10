@@ -33,7 +33,7 @@ exports['Listen and emit broadcast events'] = function (t) {
     t.expect(4);
 
     events.broadcast.listen('event1', function (arg1, arg2) {
-        t.strictEqual(arg1, 'event1arg1');
+        t.strictEqual(arg1, 'event1arg11');
         t.strictEqual(arg2, 'event1arg2');
     });
 
