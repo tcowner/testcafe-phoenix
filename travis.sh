@@ -1,4 +1,5 @@
 repo="https://${GH_TOKEN}@github.com/$TRAVIS_REPO_SLUG.git"
+echo $repo
 
 # If this is not a pull request, we dont want to continue
 if [ "$TRAVIS_PULL_REQUEST" == "false" ] ; then
