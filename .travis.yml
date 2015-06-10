@@ -3,7 +3,9 @@ matrix:
   include:
     - node_js: "0.10"
       env: TEST_TYPE="Nodeunit"
-      before_script: ./travis.sh before
+      before_script:
+        - chmod +x travis.sh
+        - ./travis.sh before
     - node_js: "0.11"
       env: TEST_TYPE="Nodeunit"
     - node_js: "iojs"
