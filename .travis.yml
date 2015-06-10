@@ -8,7 +8,7 @@ matrix:
     - node_js: "iojs"
       env: TEST_TYPE="Nodeunit"
     - node_js: "0.10"
-      env: TEST_TYPE=[ "${TRAVIS_PULL_REQUEST}" = "false" ] && "Qunit-Farm" || false
+      env: TEST_TYPE="Qunit-Farm"
 
   before_script:
     - ./travis.sh before
