@@ -160,8 +160,6 @@ var HangPromise = makePromise(function () {
         });
 
         gulp.task('sauce-start', function () {
-            console.log('Qunit-Farm variables:', SAUCE_LABS_USERNAME, SAUCE_LABS_PASSWORD, process.env.TRAVIS_BRANCH);
-
             return new Promise(function (resolve, reject) {
                 sauceTunnel = new SauceTunnel(SAUCE_LABS_USERNAME, SAUCE_LABS_PASSWORD, tunnelIdentifier, true);
 
