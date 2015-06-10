@@ -2,6 +2,12 @@ language: node_js
 matrix:
   include:
     - node_js: "0.10"
+      env: TEST_TYPE="Nodeunit"
+    - node_js: "0.11"
+      env: TEST_TYPE="Nodeunit"
+    - node_js: "iojs"
+      env: TEST_TYPE="Nodeunit"
+    - node_js: "0.10"
       env: TEST_TYPE=[ "${TRAVIS_PULL_REQUEST}" = "false" ] && "Qunit-Farm" || false
 
   before_script:
