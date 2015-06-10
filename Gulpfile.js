@@ -237,7 +237,8 @@ var HangPromise = makePromise(function () {
             .pipe(nodeunit());
     });
 
-    gulp.task('Farm-Tests', process.env.TEST_TYPE ? [process.env.TEST_TYPE] : []);
-})();
+    var testType      = process.env.TEST_TYPE;
+    var isPullRequest = process.env.TRAVIS_PULL_REQUEST !== 'false';
 
-//Test pull-request - 1
+    gulp.task('Farm-Tests', (!isPullRequest && testType) ? [testType] : []);
+})();
