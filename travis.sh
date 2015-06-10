@@ -1,13 +1,17 @@
 repo="https://${GH_TOKEN}@github.com/$TRAVIS_REPO_SLUG.git"
 
-git fetch
-git branch --all
-# This part of the script is run before installing deps or tests
-if [ "$1" = "before" ] ; then
-	echo "----BEFORE MESSAGE----"
-		exit 0
+# If this is not a pull request, we dont want to continue
+if [ "$TRAVIS_PULL_REQUEST" == "false" ] ; then
+  echo "Nothing to do on a pull request"
+  exit 0
 fi
 
-if [ "$1" = "branch" ] ; then
-	echo "----BRANCH MESSAGE----"
+git fetch
+
+# This part of the script is run before installing deps or tests
+if [ "$1" = "before" ] ; then
+	git checkout -b incoming-pr-$TRAVIS_BUILD_ID
+	git push $repo incoming-pr-$TRAVIS_BUILD_ID
+	git checkout master
+    exit 0
 fi
