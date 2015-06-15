@@ -9,3 +9,8 @@ notifications:
   email:
     on_success: never
 
+# blacklist
+branches:
+  except:
+    - /^temp-pr-.*$/
+
