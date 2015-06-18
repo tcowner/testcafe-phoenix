@@ -52,7 +52,7 @@ exports['Listen and emit broadcast events'] = function (t) {
 exports['Emit in proxy context'] = function (t) {
     var events = new Events();
 
-    t.expect(2);z
+    t.expect(2);
 
     var ownerToken = 'testToken',
         ctx = {
