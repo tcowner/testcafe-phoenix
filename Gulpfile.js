@@ -131,9 +131,6 @@ var HangPromise = makePromise(function () {
         var QUnitRunner = require('./test/qunit/sauce-labs-qunit-runner');
         var gulpConnect = require('gulp-connect');
 
-        /*var SAUCE_LABS_USERNAME = 'alexandermos';
-        var SAUCE_LABS_PASSWORD = '3715e8f7-35de-431d-9c0e-6730b54f330f';*/
-
         var SAUCE_LABS_USERNAME = process.env.SAUCE_LABS_USERNAME || '';
         var SAUCE_LABS_PASSWORD = process.env.SAUCE_LABS_PASSWORD || '';
         var BROWSERS            = [
@@ -237,10 +234,5 @@ var HangPromise = makePromise(function () {
             .pipe(nodeunit());
     });
 
-    var testType      = process.env.TEST_TYPE;
-    var isPullRequest = process.env.TRAVIS_PULL_REQUEST !== 'false';
-
-    gulp.task('Farm-Tests', (!isPullRequest && testType) ? [testType] : []);
+    gulp.task('Farm-Tests', [process.env.GULP_TASK]);
 })();
-
-//Test pull request 4
