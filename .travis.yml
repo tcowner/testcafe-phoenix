@@ -3,14 +3,14 @@ matrix:
   include:
     - node_js: "0.10"
       env: TEST_TYPE="Nodeunit"
+    - node_js: "0.11"
+      env: TEST_TYPE="Nodeunit"
+    - node_js: "iojs"
+      env: TEST_TYPE="Nodeunit"
+    - node_js: "0.10"
+      env: TEST_TYPE="Qunit-Farm"
   fast_finish: true
 
 notifications:
-  email:
-    on_success: never
-
-# blacklist
-branches:
-  except:
-    - /^temp-pr-.*$/
+  email: false
 
