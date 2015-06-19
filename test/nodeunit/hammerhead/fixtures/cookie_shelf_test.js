@@ -55,7 +55,7 @@ exports['Cookies management'] = {
         var cookieStr = cookieShelf.getClientCookieString(jobInfo, 'http://test.dc5f4ce48f6.com/TestPath/Test');
 
         t.ok(isCookieStringMatch(cookieStr, [
-            'est1=Basic',
+            'Test1=Basic',
             'Test2=PathMatch',
             'Test4=DomainMatch',
             'Test9=Duplicate',
