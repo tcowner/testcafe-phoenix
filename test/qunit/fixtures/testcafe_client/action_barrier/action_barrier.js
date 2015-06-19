@@ -78,7 +78,7 @@ $(document).ready(function () {
         };
 
         var callback = function () {
-            ok(!windowErrorRaised);
+            ok(windowErrorRaised);
         };
 
         ActionBarrier.waitActionSideEffectsCompletion(action, callback);
