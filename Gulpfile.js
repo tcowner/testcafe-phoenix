@@ -185,21 +185,61 @@ var HangPromise = makePromise(function () {
             });
 
             runner.runTests(function (results) {
-                var failedCount = false;
+                function bold (text) {
+                    return '\033[1m' + text + '\033[22m';
+                }
 
-                console.log(JSON.stringify(results, null, 4));
+                function red (text) {
+                    return '\033[31m' + text + '\033[39m';
+                }
 
-                results.forEach(function (resultsByUrl) {
-                    resultsByUrl.forEach(function (platformResults) {
-                        if (platformResults.result.failed)
-                            failedCount += platformResults.result.failed;
+                function green (text) {
+                    return '\033[32m' + text + '\033[39m';
+                }
+
+                var errors = [];
+
+                results[0].forEach(function (platformResults) {
+                    var msg      = [];
+                    var platform = [platformResults.platform[0], platformResults.platform[1], platformResults.platform[2] ||
+                                                                                              ''].join(' ');
+
+                    msg.push(bold(platformResults.result.failed ? red('FAILURES:') : green('OK:')));
+                    msg.push(platform);
+                    msg.push(bold('Total:'), platformResults.result.total);
+                    msg.push(bold('Failed:'), platformResults.result.failed);
+
+                    console.log(msg.join(' '));
+
+                    platformResults.result.errors.forEach(function (error) {
+                        error.platform = platform;
+                        errors.push(error);
                     });
+
                 });
 
-                taskSucceed = !failedCount;
+                taskSucceed = !errors.length;
 
-                if (!taskSucceed)
-                    console.log(failedCount, 'test(s) are failed');
+                if (!taskSucceed) {
+                    console.log(bold(red('ERRORS:')));
+
+                    errors.forEach(function (error) {
+                        console.log(bold(error.platform + ' - ' + error.testPath));
+                        console.log(bold('Test: ' + error.testName));
+
+                        if (error.customMessage)
+                            console.log('message: ' + error.customMessage);
+
+                        if(error.expected) {
+                            console.log('expected: ' + error.expected);
+                            console.log('actual: ' + error.actual);
+                        }
+
+                        console.log('-------------------------------------------');
+                        console.log();
+                    });
+                }
+
                 callback();
             });
         });
