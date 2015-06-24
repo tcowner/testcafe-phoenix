@@ -211,10 +211,12 @@ var HangPromise = makePromise(function () {
 
                     console.log(msg.join(' '));
 
-                    platformResults.result.errors.forEach(function (error) {
-                        error.platform = platform;
-                        errors.push(error);
-                    });
+                    if (platformResults.result.errors) {
+                        platformResults.result.errors.forEach(function (error) {
+                            error.platform = platform;
+                            errors.push(error);
+                        });
+                    }
 
                 });
 
